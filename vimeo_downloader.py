@@ -4,9 +4,23 @@ import subprocess
 import sys
 import re
 import json
+
+WGET_BASE = ['curl','-A',USER_AGENT,'-s','-o']
+
+if 0==subprocess.call(['wget','--version']):
+    QUIET_WGET = ['wget','-U',USER_AGENT,'-q','-O','-']
+    TARGET_WGET = ['wget','-U',USER_AGENT,'-O']
+else if 0==subprocess.call(['curl','--version']):
+    QUIET_WGET = ['curl','-A',USER_AGENT,'-s']
+    TARGET_WGET = ['curl','-A',USER_AGENT,'-o']
+else:
+    print "no downloader found"
+    sys.exit(5)
+
+
 vimeo_id = sys.argv[1]
 try:
-    xml = subprocess.check_output(['wget','-U',USER_AGENT,'-q','-O','-','http://vimeo.com/'+vimeo_id])
+    xml = subprocess.check_output(QUIET_WGET+['http://vimeo.com/'+vimeo_id])
 except:
     print "download of video page failed"
     sys.exit(1)
@@ -30,7 +44,7 @@ except KeyError:
     print "json for player embedding unexpected"
     sys.exit(3)
 try:
-    theconfig = subprocess.check_output(['wget','-U',USER_AGENT,'-q','-O','-',configurl])
+    theconfig = subprocess.check_output(QUIET_WGET+[configurl])
 except:
     print "download of player configuration failed"
     sys.exit(1)
@@ -56,7 +70,7 @@ print "chose ",v['quality']," as best resolution"
 
 filename=caption+"-("+quality+"-"+vimeo_id+").flv"
 try:
-    subprocess.check_call(['wget','-U',USER_AGENT,'-O',filename,besturl])
+    subprocess.check_call(TARGET_WGET+[filename,besturl])
 except:
     print "download of video failed"
     sys.exit(2)
