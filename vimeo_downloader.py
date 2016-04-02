@@ -6,7 +6,6 @@ import re
 import json
 vimeo_id = sys.argv[1]
 try:
-    subprocess.call(['wget','-U',USER_AGENT,'-q','-O','XML','http://vimeo.com/'+vimeo_id])
     xml = subprocess.check_output(['wget','-U',USER_AGENT,'-q','-O','-','http://vimeo.com/'+vimeo_id])
 except:
     print "download of video page failed"
