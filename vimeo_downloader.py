@@ -10,7 +10,7 @@ WGET_BASE = ['curl','-A',USER_AGENT,'-s','-o']
 if 0==subprocess.call(['wget','--version']):
     QUIET_WGET = ['wget','-U',USER_AGENT,'-q','-O','-']
     TARGET_WGET = ['wget','-U',USER_AGENT,'-O']
-else if 0==subprocess.call(['curl','--version']):
+elif 0==subprocess.call(['curl','--version']):
     QUIET_WGET = ['curl','-A',USER_AGENT,'-s']
     TARGET_WGET = ['curl','-A',USER_AGENT,'-o']
 else:
@@ -69,9 +69,11 @@ quality = max(res_url)
 print "chose ",v['quality']," as best resolution"
 
 filename=caption+"-("+quality+"-"+vimeo_id+").flv"
+filename=filename.replace("/","_")
 try:
     subprocess.check_call(TARGET_WGET+[filename,besturl])
 except:
     print "download of video failed"
+    print "call was: ", TARGET_WGET+[filename,besturl]
     sys.exit(2)
 sys.exit(0)
