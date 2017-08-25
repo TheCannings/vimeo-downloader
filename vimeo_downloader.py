@@ -38,6 +38,9 @@ for l in xml:
         config_line = l
     if 'meta property="og:title' in l:
         caption_line = l
+if config_line is None:
+    print "could not find clip_page_config"
+    sys.exit(4)
 confurljson = re.sub(".*clip_page_config[^{]*","",config_line)[:-1]
 caption = re.sub(".*content=.","",caption_line)[:-2]
 try:
