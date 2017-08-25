@@ -18,15 +18,23 @@ else:
     sys.exit(5)
 
 
-vimeo_id = sys.argv[1]
+try:
+    vimeo_id = sys.argv[1]
+except IndexError:
+    print "no vimeo ID provided"
+    print "USAGE: ", sys.argv[0], "123456"
+    print "to access http://vimeo.com/123456"
+    sys.exit(1)
+
 try:
     xml = subprocess.check_output(QUIET_WGET+['http://vimeo.com/'+vimeo_id])
 except:
     print "download of video page failed"
     sys.exit(1)
 xml = xml.split("\n")
+config_line = None
 for l in xml:
-    if "clip_page_config" in l:
+    if "clip_page_config" in l and config_line is None:
         config_line = l
     if 'meta property="og:title' in l:
         caption_line = l
