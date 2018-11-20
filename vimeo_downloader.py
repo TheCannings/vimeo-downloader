@@ -1,4 +1,3 @@
-#!/usr/bin/python2.7
 USER_AGENT = "Mozilla/5.0"
 import subprocess
 import sys
@@ -14,22 +13,22 @@ elif 0==subprocess.call(['curl','--version']):
     QUIET_WGET = ['curl','-A',USER_AGENT,'-s']
     TARGET_WGET = ['curl','-A',USER_AGENT,'-o']
 else:
-    print "no downloader found"
+    print("no downloader found")
     sys.exit(5)
 
 
 try:
     vimeo_id = sys.argv[1]
 except IndexError:
-    print "no vimeo ID provided"
-    print "USAGE: ", sys.argv[0], "123456"
-    print "to access http://vimeo.com/123456"
+    print("no vimeo ID provided")
+    print("USAGE: ", sys.argv[0], "123456")
+    print("to access http://vimeo.com/123456")
     sys.exit(1)
 
 try:
     xml = subprocess.check_output(QUIET_WGET+['http://vimeo.com/'+vimeo_id])
 except:
-    print "download of video page failed"
+    print("download of video page failed")
     sys.exit(1)
 xml = xml.split("\n")
 config_line = None
@@ -39,52 +38,52 @@ for l in xml:
     if 'meta property="og:title' in l:
         caption_line = l
 if config_line is None:
-    print "could not find clip_page_config"
+    print("could not find clip_page_config")
     sys.exit(4)
 confurljson = re.sub(".*clip_page_config[^{]*","",config_line)[:-1]
 caption = re.sub(".*content=.","",caption_line)[:-2]
 try:
     myjson = json.loads(confurljson)
 except ValueError:
-    print "no valid json found in clip_page_config"
-    print confurljson
+    print("no valid json found in clip_page_config")
+    print(confurljson)
     sys.exit(4)
 try:
     configurl = myjson['player']['config_url']
 except KeyError:
-    print "json for player embedding unexpected"
+    print("json for player embedding unexpected")
     sys.exit(3)
 try:
     theconfig = subprocess.check_output(QUIET_WGET+[configurl])
 except:
-    print "download of player configuration failed"
+    print("download of player configuration failed")
     sys.exit(1)
 try:
     video_url_json = json.loads(theconfig)["request"]["files"]["progressive"]
 except KeyError:
-    print "unexpected player configuration json format"
+    print("unexpected player configuration json format")
     sys.exit(3)
 except ValueError:
-    print "no valid json found in player configuration"
+    print("no valid json found in player configuration")
     sys.exit(4)
 res_url = {}
 for v in video_url_json:
     try:
-        print "available quality ",v['quality']
+        print("available quality ",v['quality'])
         res_url[v['quality']] = v['url']
     except KeyError:
-        print "unexpected player configuration json format"
+        print("unexpected player configuration json format")
         sys.exit(3)
 besturl = res_url[max(res_url)]
 quality = max(res_url)
-print "chose ",v['quality']," as best resolution"
+print("chose ",v['quality']," as best resolution")
 
 filename=caption+"-("+quality+"-"+vimeo_id+").flv"
 filename=filename.replace("/","_")
 try:
     subprocess.check_call(TARGET_WGET+[filename,besturl])
 except:
-    print "download of video failed"
-    print "call was: ", TARGET_WGET+[filename,besturl]
+    print("download of video failed")
+    print("call was: ", TARGET_WGET+[filename,besturl])
     sys.exit(2)
 sys.exit(0)
